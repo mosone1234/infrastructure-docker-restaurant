@@ -1,0 +1,49 @@
+version: "3"
+services:
+  frontend:
+    container_name: restaurant-frontend
+    build:
+      context: ./app/frontend_food
+      dockerfile: Dockerfile
+    image: food/restaurant-docker:latest
+    volumes:
+      - ./app/frontend_food:/frontend_food
+      - /frontend_food/node_modules
+    ports: 
+      - "4200:4200"
+    command: ["nginx", "-g", "daemon off;"]
+  backend:
+    container_name: restaurant-backend
+    build:
+      context: ./app/backend-restfull-food
+      dockerfile: Dockerfile
+    image: food/restaurant-backend-docker:latest
+    volumes: 
+      - ./app/backend-restfull-food:/backend-restfull-food
+      - /backend-restfull-food/node_modules
+    depends_on: 
+      - db
+    networks: 
+      - connection
+    ports: 
+      - "3000:3000"
+    command: ["npm", "start"]
+  db:
+    container_name: postgres-docker
+    image: postgres
+    restart: always
+    environment: 
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123
+      - POSTGRES_DB=restfullfood
+    # volumes: 
+    #   - "./.docker_pgdata:/var/lib/postgresql/data"
+    ports:
+      - "54320:5432"
+    expose: 
+      - "54320"
+    networks: 
+      - connection
+networks: 
+  connection:
+# iptables -L -n
