@@ -1,14 +1,12 @@
 version: "3"
-services:
-  frontend:
+services: 
+  frontend: 
     container_name: restaurant-frontend
-    build:
+    build: 
       context: ./app/frontend_food
       dockerfile: Dockerfile
-    image: food/restaurant-docker:latest
-    environment:
-      - configuration=production
-    volumes:
+    image: food/restaurant-frontend-docker:latest
+    volumes: 
       - ./app/frontend_food:/frontend_food
       - /frontend_food/node_modules
     ports: 
@@ -16,20 +14,35 @@ services:
     command: ["nginx", "-g", "daemon off;"]
   backend:
     container_name: restaurant-backend
-    build:
+    build: 
       context: ./app/backend-restfull-food
       dockerfile: Dockerfile
     image: food/restaurant-backend-docker:latest
-    environment: 
-      - NODE_ENV=production
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=restfullfood
-      # Added AWS (RDS)
-      - POSTGRES_HOST=restfullfood.cli2jwxep0nv.us-east-1.rds.amazonaws.com 
     volumes: 
       - ./app/backend-restfull-food:/backend-restfull-food
       - /backend-restfull-food/node_modules
-    ports: 
+    depends_on: 
+      - db
+    networks: 
+      - conection
+    ports:
       - "3000:3000"
     command: ["npm", "start"]
+  db:
+    container_name: postgres-docker
+    image: postgres
+    restart: always
+    environment: 
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POTGRES_DB=restfullfood
+    # volumes: 
+    #   - "./app/docker_pgdata:/var/lib/postgresql/data"
+    ports: 
+      - "54320:5432"
+    expose:
+      - "54320"
+    networks: 
+      - conection
+networks: 
+  conection:
